@@ -30,14 +30,16 @@
   },
   "homepage": "https://github.com/mljs/ml-gravitational-clustering#readme",
   "devDependencies": {
+    "benchmark": "^2.1.1",
     "eslint": "^3.1.0",
     "eslint-config-cheminfo": "^1.0.0",
+    "eslint-plugin-no-only-tests": "^1.1.0",
     "mocha": "^2.5.3",
     "mocha-better-spec-reporter": "^3.0.2",
-    "should": "^10.0.0",
-    "eslint-plugin-no-only-tests": "^1.1.0"
+    "should": "^10.0.0"
   },
   "dependencies": {
+    "ml-distance": "^2.1.1",
     "union-find": "^1.0.2"
   }
 }
