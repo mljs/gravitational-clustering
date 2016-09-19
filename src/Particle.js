@@ -1,6 +1,12 @@
 'use strict';
 
 class Particle {
+
+    /**
+     * Constructor of a particle.
+     * @param position {Array} - the current position of the particle.
+     * @param mass {Number} - the mass of the particle (default: 1.0).
+     */
     constructor(position, mass) {
         this.position = new Array(position.length);
         for (var i = 0; i < position.length; ++i) {
@@ -11,10 +17,25 @@ class Particle {
         this.originalPosition = position;
     }
 
+    /**
+     * Distance between this particle and another particle with a given distance function.
+     *
+     * @param particle {Particle}
+     * @param dist {function} - distance function.
+     * @return {Number}
+     */
     distance(particle, dist) {
         return dist(this.position, particle.position);
     }
 
+    /**
+     * Retrieve the delta vector to calculate the new position of particle A.
+     * @param particleA {Particle}
+     * @param particleB {Particle}
+     * @param gravityConstant {Number}
+     * @param distFunction {function} - distance function.
+     * @return {Array}
+     */
     static moveParticle(particleA, particleB, gravityConstant, distFunction) {
         var dimension = particleA.position.length;
 
