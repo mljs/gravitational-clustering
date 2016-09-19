@@ -115,6 +115,34 @@ class GravitationalClustering {
             }
             this.GC *= (1 - this.deltaGC);
         }
+
+        var clusters = {};
+        for(i = 0; i < this.particles.length; ++i) {
+            var particle = this.particles[i];
+            var key = this.uf.find(i);
+
+            if(clusters[key] !== undefined) {
+                clusters[key].elements.push(particle);
+            } else {
+                clusters[key] = new ParticleCluster(particle);
+            }
+        }
+
+        var keys= Object.keys(clusters);
+        var remainingClusters = {};
+        for(i = 0; i < keys.length; ++i) {
+            key = keys[i];
+            var particleCluster = clusters[key];
+            if(particleCluster.elements.length < this.alpha * this.particles.length) {
+                for(j = 0; j < particleCluster.elements.length; ++j) {
+                    this.outliers.push(particleCluster.elements[j].originalPosition);
+                }
+            } else {
+                remainingClusters[key] = particleCluster;
+            }
+        }
+
+        return remainingClusters;
     }
 }
 

@@ -8,6 +8,7 @@ class Particle {
         }
 
         this.mass = mass == undefined ? 1.0 : mass;
+        this.originalPosition = position;
     }
 
     distance(particle, dist) {
