@@ -3,6 +3,7 @@
 var Particle = require('./Particle');
 var UnionFind = require('union-find');
 var Distance = require('ml-distance').distance;
+var randomInt = require('./Utils').randomInt;
 
 class ParticleCluster {
     constructor(particle) {
@@ -186,10 +187,6 @@ class GravitationalClustering {
             clusters: keys.length
         };
     }
-}
-
-function randomInt(max) {
-    return Math.floor(Math.random() * max);
 }
 
 module.exports = GravitationalClustering;

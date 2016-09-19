@@ -14,3 +14,5 @@ class Utils {
         return Math.floor(Math.random() * max);
     }
 }
+
+module.exports = Utils;
