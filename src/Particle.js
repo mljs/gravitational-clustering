@@ -3,11 +3,11 @@
 class Particle {
     constructor(position, mass) {
         this.position = new Array(position.length);
-        for(var i = 0; i < position.length; ++i) {
+        for (var i = 0; i < position.length; ++i) {
             this.position[i] = position[i];
         }
 
-        this.mass = mass == undefined ? 1.0 : mass;
+        this.mass = mass === undefined ? 1.0 : mass;
         this.originalPosition = position;
     }
 
@@ -16,12 +16,12 @@ class Particle {
     }
 
     static moveParticle(particleA, particleB, gravityConstant, distFunction) {
-        var dimension = particleA.length;
+        var dimension = particleA.position.length;
 
         var magnitude = 0.0;
         var difference = new Array(dimension);
 
-        for(var i = 0; i < dimension; ++i) {
+        for (var i = 0; i < dimension; ++i) {
             difference[i] = particleB.position[i] - particleA.position[i];
             magnitude += (difference[i] * difference[i]);
         }
@@ -29,11 +29,13 @@ class Particle {
         magnitude = distFunction(particleA.position, particleB.position);
 
         var scale = 0.0;
-        if(magnitude > 0) scale = (gravityConstant * particleA.mass * particleB.mass) / (2.0 * magnitude * magnitude * magnitude);
+        if (magnitude > 0) scale = (gravityConstant * particleA.mass * particleB.mass) / (2.0 * magnitude * magnitude * magnitude);
 
         var move = new Array(dimension);
-        for(i = 0 ; i < dimension; ++i) move[i] = difference[i] * scale;
+        for (i = 0; i < dimension; ++i) move[i] = difference[i] * scale;
 
         return move;
     }
 }
+
+module.exports = Particle;

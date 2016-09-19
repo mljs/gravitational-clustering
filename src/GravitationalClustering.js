@@ -7,18 +7,18 @@ var Distance = require('ml-distance').distance;
 class ParticleCluster {
     constructor(particle) {
         this.elements = [];
-        if(particle !== undefined) {
+        if (particle !== undefined) {
             this.elements.push(particle);
         }
     }
 
     mass(unitMass) {
-        if(unitMass) {
+        if (unitMass) {
             return this.elements.length;
         }
 
         var totalMass = 0.0;
-        for(var i = 0; i < this.elements.length; ++i) {
+        for (var i = 0; i < this.elements.length; ++i) {
             totalMass += this.elements[i].mass;
         }
         return totalMass;
@@ -26,27 +26,30 @@ class ParticleCluster {
 }
 
 class GravitationalClustering {
-    constructor(options, X) {
-        if(options == undefined) options = {};
+    constructor(options, X, masses) {
+        if (options === undefined) options = {};
         this.unitMass = options.unitMass ? options.unitMass : true;
         this.GC = options.GC ? options.GC : Math.pow(10, -4);
         this.deltaGC = options.deltaGC ? options.deltaGC : 0.001;
         this.alpha = options.alpha ? options.alpha : 0.03;
         this.eps = Number.MAX_VALUE;
-        this.gamma = options.gamma ? options.gamma : 0.6;
+        this.gamma = options.gamma ? options.gamma : 0.2;
         this.dist = options.dist ? options.dist : Distance.euclidean;
 
         this.particles = [];
         this.outliers = [];
 
-        if(X !== undefined && X.length !== 0) {
-            this.set(X);
+        if (X !== undefined && X.length !== 0) {
+            this.set(X, masses);
         }
     }
 
-    set(X) {
-        if(X.length === 0) {
-            throw new RangeError("The matrix length should be greater than 0.");
+    set(X, masses) {
+        if (X.length === 0) {
+            throw new RangeError('The matrix length should be greater than 0.');
+        }
+        if (masses === undefined) {
+            masses = new Array(X.length);
         }
 
         this.particles = [];
@@ -54,43 +57,44 @@ class GravitationalClustering {
 
         var dim = X[0].length;
         var elements = X.length;
-        var minValues = new Array(elements);
-        var maxValues = new Array(elements);
+        var minValues = new Array(dim);
+        var maxValues = new Array(dim);
 
-        for(var i = 0; i < dim; ++i) {
+        for (var i = 0; i < dim; ++i) {
             minValues[i] = Number.MAX_VALUE;
             maxValues[i] = Number.MIN_VALUE;
         }
 
         this.uf = new UnionFind(elements);
-        for(i = 0; i < elements; ++i) {
+        for (i = 0; i < elements; ++i) {
             var elem = X[i];
-            if(dim !== elem.length) throw new RangeError("The element at position " + i + "must have a size of "
-                                                        + dim + " but has: " + elem.length);
+            var mass = masses[i];
+            if (dim !== elem.length) throw new RangeError('The element at position ' + i + 'must have a size of '
+                                                        + dim + ' but has: ' + elem.length);
 
-            for(var j = 0 ; j < dim; ++j) {
+            for (var j = 0; j < dim; ++j) {
                 var comp = elem[j];
                 minValues[j] = Math.min(minValues[j], comp);
                 maxValues[j] = Math.max(maxValues[j], comp);
             }
 
-            this.particles.push(new Particle(elem));
+            this.particles.push(new Particle(elem, mass));
         }
 
-        var dist = 0.0;
+        var dist = this.dist(maxValues, minValues);
 
-        for(i = 0; i < dim; ++i) {
+        /*for (i = 0; i < dim; ++i) {
             var min = minValues[i];
             var max = maxValues[i];
             dist += ((max - min) * (max - min));
-        }
+        }*/
 
-        this.eps = this.gamma * Math.sqrt(dist);
+        this.eps = this.gamma * dist;
     }
 
     move(particleA, particleB) {
         var deltaA = Particle.moveParticle(particleA, particleB, this.GC, this.dist);
-        for(var i = 0; i < deltaA.length; ++i) {
+        for (var i = 0; i < deltaA.length; ++i) {
             particleA.position[i] += deltaA[i];
             particleB.position[i] -= deltaA[i];
         }
@@ -101,52 +105,62 @@ class GravitationalClustering {
     }
 
     run(iterations) {
-        for(var i = 0; i < iterations; ++i) {
-            for(var j = 0; j < this.particles.length; ++i) {
+        for (var i = 0; i < iterations; ++i) {
+            for (var j = 0; j < this.particles.length; ++j) {
                 var k = randomInt(this.particles.length);
-                while(k !== j) k = randomInt(this.particles.length);
+                while (k === j) k = randomInt(this.particles.length);
 
                 var xk = this.particles[k];
                 var xj = this.particles[j];
 
                 this.move(xk, xj);
 
-                if(xj.distance(xk, this.dist) < this.eps) this.merge(j, k);
+                if (xj.distance(xk, this.dist) < this.eps) this.merge(j, k);
             }
             this.GC *= (1 - this.deltaGC);
         }
 
         var clusters = {};
-        for(i = 0; i < this.particles.length; ++i) {
+        for (i = 0; i < this.particles.length; ++i) {
             var particle = this.particles[i];
             var key = this.uf.find(i);
 
-            if(clusters[key] !== undefined) {
+            if (clusters[key] !== undefined) {
                 clusters[key].elements.push(particle);
             } else {
                 clusters[key] = new ParticleCluster(particle);
             }
         }
 
-        var keys= Object.keys(clusters);
-        var remainingClusters = {};
-        for(i = 0; i < keys.length; ++i) {
+        var keys = Object.keys(clusters);
+        var X = [];
+        var y = [];
+        for (i = 0; i < keys.length; ++i) {
             key = keys[i];
             var particleCluster = clusters[key];
-            if(particleCluster.elements.length < this.alpha * this.particles.length) {
-                for(j = 0; j < particleCluster.elements.length; ++j) {
+            if (particleCluster.elements.length < this.alpha * this.particles.length) {
+                for (j = 0; j < particleCluster.elements.length; ++j) {
                     this.outliers.push(particleCluster.elements[j].originalPosition);
                 }
             } else {
-                remainingClusters[key] = particleCluster;
+                for (j = 0; j < particleCluster.elements.length; ++j) {
+                    X.push(particleCluster.elements[j].originalPosition);
+                    y.push(i);
+                }
             }
         }
 
-        return remainingClusters;
+        return {
+            outliers: this.outliers,
+            X: X,
+            y: y,
+            clusters: keys.length
+        };
     }
 }
 
-function randomInt(max)
-{
-    return Math.floor(Math.random()*max);
+function randomInt(max) {
+    return Math.floor(Math.random() * max);
 }
+
+module.exports = GravitationalClustering;
