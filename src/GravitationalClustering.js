@@ -5,24 +5,19 @@ var UnionFind = require('ml-disjoint-set');
 var Distance = require('ml-distance').distance;
 var randomInt = require('./Utils').randomInt;
 
+/**
+ * @class ParticleCluster
+ */
 class ParticleCluster {
+    /**
+     * ParticleCluster constructor.
+     * @param particle {Particle} - Initial particle for the cluster (optional)
+     */
     constructor(particle) {
         this.elements = [];
         if (particle !== undefined) {
             this.elements.push(particle);
         }
-    }
-
-    mass(unitMass) {
-        if (unitMass) {
-            return this.elements.length;
-        }
-
-        var totalMass = 0.0;
-        for (var i = 0; i < this.elements.length; ++i) {
-            totalMass += this.elements[i].mass;
-        }
-        return totalMass;
     }
 }
 
