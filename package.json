@@ -39,7 +39,7 @@
     "should": "^10.0.0"
   },
   "dependencies": {
-    "ml-distance": "^2.1.1",
-    "union-find": "^1.0.2"
+    "ml-disjoint-set": "^1.0.0",
+    "ml-distance": "^2.1.1"
   }
 }

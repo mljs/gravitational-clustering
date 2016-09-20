@@ -1,7 +1,7 @@
 'use strict';
 
 var Particle = require('./Particle');
-var UnionFind = require('union-find');
+var UnionFind = require('ml-disjoint-set');
 var Distance = require('ml-distance').distance;
 var randomInt = require('./Utils').randomInt;
 
@@ -87,8 +87,10 @@ class GravitationalClustering {
             maxValues[i] = Number.MIN_VALUE;
         }
 
-        this.uf = new UnionFind(elements);
+        this.uf = new UnionFind();
+        this.disjointElems = new Array(elements);
         for (i = 0; i < elements; ++i) {
+            this.disjointElems[i] = this.uf.add(i);
             var elem = X[i];
             var mass = masses[i];
             if (dim !== elem.length) throw new RangeError('The element at position ' + i + 'must have a size of '
@@ -121,11 +123,11 @@ class GravitationalClustering {
 
     /**
      * Merge two particle indices in the X array to the same cluster.
-     * @param a {Number}
-     * @param b {Number}
+     * @param a {DisjointSetNode}
+     * @param b {DisjointSetNode}
      */
     merge(a, b) {
-        this.uf.link(a, b);
+        this.uf.union(a, b);
     }
 
     /**
@@ -145,7 +147,7 @@ class GravitationalClustering {
 
                 this.move(xk, xj);
 
-                if (xj.distance(xk, this.dist) < this.eps) this.merge(j, k);
+                if (xj.distance(xk, this.dist) < this.eps) this.merge(this.disjointElems[j], this.disjointElems[k]);
             }
             this.GC *= (1 - this.deltaGC);
         }
@@ -153,7 +155,7 @@ class GravitationalClustering {
         var clusters = {};
         for (i = 0; i < this.particles.length; ++i) {
             var particle = this.particles[i];
-            var key = this.uf.find(i);
+            var key = this.uf.find(this.disjointElems[i]).value;
 
             if (clusters[key] !== undefined) {
                 clusters[key].elements.push(particle);
