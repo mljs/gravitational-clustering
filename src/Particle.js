@@ -5,7 +5,7 @@ class Particle {
     /**
      * Constructor of a particle.
      * @param position {Array} - the current position of the particle.
-     * @param mass {Number} - the mass of the particle (default: 1.0).
+     * @param mass {number} - the mass of the particle (default: 1.0).
      */
     constructor(position, mass) {
         this.position = new Array(position.length);
@@ -13,7 +13,7 @@ class Particle {
             this.position[i] = position[i];
         }
 
-        this.mass = mass === undefined ? 1.0 : mass;
+        this.mass = mass || 1.0;
         this.originalPosition = position;
     }
 
@@ -22,7 +22,7 @@ class Particle {
      *
      * @param particle {Particle}
      * @param dist {function} - distance function.
-     * @return {Number}
+     * @return {number}
      */
     distance(particle, dist) {
         return dist(this.position, particle.position);

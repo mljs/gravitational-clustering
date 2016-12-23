@@ -16,8 +16,8 @@ describe('basic implementation', function () {
         }
         var expectedOutput = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2];
 
-        var gc = new GravitationalClustering({}, arr);
-        var result = gc.run(20);
+        var gc = new GravitationalClustering();
+        var result = gc.train(arr);
 
         for (i = 0; i < clusters; ++i) {
             for (j = 0; j < size; ++j) {
@@ -37,8 +37,8 @@ describe('basic implementation', function () {
             arr[800 + i] = [random(9, 11), random(9, 11)];
         }
 
-        var gc = new GravitationalClustering({}, arr);
-        var result = gc.run(45);
+        var gc = new GravitationalClustering();
+        var result = gc.train(arr);
 
         for (i = 0; i < 800; i++) {
             result.y[i].should.be.equal(0);

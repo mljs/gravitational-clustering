@@ -30,38 +30,34 @@ class GravitationalClustering {
      * Create a new instance of a Gravitational Clustering algorithm
      * @param {Object} options
      * @param {Boolean} [options.unitMass] - the mass of each point are equal.
-     * @param {Number} [options.GC] - Gravitational constant (default: 10^-4)
-     * @param {Number} [options.deltaGC] - Constant to reduce the gravitational constant (default: 0.001)
-     * @param {Number} [options.alpha] - Minimum percentage of the dataset to become a cluster (default: 0.03)
-     * @param {Number} [options.gamma] - Percentage of space used as the radius of each particle used to create the clusters (default: 0.2)
+     * @param {Number} [options.gravitationalConstant=10^-4] - Gravitational constant.
+     * @param {Number} [options.deltaGravitationalConstant=0.001] - Constant to reduce the gravitational constant.
+     * @param {Number} [options.alpha=0.03] - Minimum percentage of the dataset to become a cluster.
+     * @param {Number} [options.gamma=0.2] - Percentage of space used as the radius of each particle used to create the clusters.
      * @param {Number} [options.dist] - Distance function that takes two points, see [ml-distance]{@link https://github.com/mljs/distance}
-     * @param X {Array} - Points to create the clusters (Optional)
-     * @param masses - Mass of each point for clustering (Optional)
+     * @param {number} [options.iterations=100] - Number of iterations of the algorithm.
      */
-    constructor(options, X, masses) {
-        if (options === undefined) options = {};
-        this.unitMass = options.unitMass ? options.unitMass : true;
-        this.GC = options.GC ? options.GC : Math.pow(10, -4);
-        this.deltaGC = options.deltaGC ? options.deltaGC : 0.001;
-        this.alpha = options.alpha ? options.alpha : 0.03;
+    constructor(options) {
+        options = options || {};
+        this.unitMass = options.unitMass || true;
+        this.gravitationalConstant = options.gravitationalConstant || Math.pow(10, -4);
+        this.deltaGravitationalConstant = options.deltaGravitationalConstant || 0.001;
+        this.alpha = options.alpha || 0.03;
         this.eps = Number.MAX_VALUE;
-        this.gamma = options.gamma ? options.gamma : 0.2;
-        this.dist = options.dist ? options.dist : Distance.euclidean;
+        this.gamma = options.gamma || 0.2;
+        this.dist = options.dist || Distance.euclidean;
+        this.iterations = options.iterations || 100;
 
         this.particles = [];
         this.outliers = [];
-
-        if (X !== undefined && X.length !== 0) {
-            this.set(X, masses);
-        }
     }
 
     /**
      * Set the points and corresponding masses for the algorithm
-     * @param X {Array} - Points to create the clusters.
-     * @param masses {Array} - Mass of each point (Optional).
+     * @param {Array} X - Points to create the clusters.
+     * @param {Array} masses - Mass of each point (Optional).
      */
-    set(X, masses) {
+    train(X, masses) {
         if (X.length === 0) {
             throw new RangeError('The matrix length should be greater than 0.');
         }
@@ -101,15 +97,17 @@ class GravitationalClustering {
         }
 
         this.eps = this.gamma * this.dist(maxValues, minValues);
+
+        return this.run(this.iterations);
     }
 
     /**
      * Move two particles closer to each other based on the gravitational constant and the selected distance function.
-     * @param particleA {Particle}
-     * @param particleB {Particle}
+     * @param {Particle} particleA
+     * @param {Particle} particleB
      */
     move(particleA, particleB) {
-        var deltaA = Particle.moveParticle(particleA, particleB, this.GC, this.dist);
+        var deltaA = Particle.moveParticle(particleA, particleB, this.gravitationalConstant, this.dist);
         for (var i = 0; i < deltaA.length; ++i) {
             particleA.position[i] += deltaA[i];
             particleB.position[i] -= deltaA[i];
@@ -118,8 +116,8 @@ class GravitationalClustering {
 
     /**
      * Merge two particle indices in the X array to the same cluster.
-     * @param a {DisjointSetNode}
-     * @param b {DisjointSetNode}
+     * @param {DisjointSetNode} a
+     * @param {DisjointSetNode} b
      */
     merge(a, b) {
         this.uf.union(a, b);
@@ -127,9 +125,8 @@ class GravitationalClustering {
 
     /**
      * Run the algorithm n-iterations partially and return the obtained clusters and outliers.
-     * you can call again this method at the current state.
-     * @param iterations {Number} - Partial iterations.
-     * @return {{outliers: Array, X: Array, y: Array, clusters: Number}}
+     * @param {number} iterations - Partial iterations.
+     * @return {object}
      */
     run(iterations) {
         for (var i = 0; i < iterations; ++i) {
@@ -144,7 +141,7 @@ class GravitationalClustering {
 
                 if (xj.distance(xk, this.dist) < this.eps) this.merge(this.disjointElems[j], this.disjointElems[k]);
             }
-            this.GC *= (1 - this.deltaGC);
+            this.gravitationalConstant *= (1 - this.deltaGravitationalConstant);
         }
 
         var clusters = {};
