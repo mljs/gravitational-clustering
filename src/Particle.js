@@ -1,6 +1,4 @@
-'use strict';
-
-class Particle {
+export default class Particle {
 
     /**
      * Constructor of a particle.
@@ -58,5 +56,3 @@ class Particle {
         return move;
     }
 }
-
-module.exports = Particle;

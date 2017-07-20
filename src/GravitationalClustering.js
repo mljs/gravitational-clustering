@@ -1,36 +1,19 @@
 import Random from 'random-js';
-
-var Particle = require('./Particle');
-var UnionFind = require('ml-disjoint-set');
-var Distance = require('ml-distance').distance;
-var randomInt = require('./Utils').randomInt;
+import ParticleCluster from './ParticleCluster';
+import Particle from './Particle';
+import UnionFind from 'ml-disjoint-set';
+import {distance as Distance} from 'ml-distance';
 
 const defaultOptions = {
-    unitMass : true,
-    gravitationalConstant : Math.pow(10, -4),
-    deltaGravitationalConstant : 0.001,
-    alpha : 0.03,
-    gamma : 0.2,
-    dist : Distance.euclidean,
-    iterations : 100,
+    unitMass: true,
+    gravitationalConstant: Math.pow(10, -4),
+    deltaGravitationalConstant: 0.001,
+    alpha: 0.03,
+    gamma: 0.2,
+    distance: 'euclidean',
+    iterations: 100,
     seed: 42
 };
-
-/**
- * @class ParticleCluster
- */
-class ParticleCluster {
-    /**
-     * ParticleCluster constructor.
-     * @param {Particle} particle - Initial particle for the cluster (optional)
-     */
-    constructor(particle) {
-        this.elements = [];
-        if (particle !== undefined) {
-            this.elements.push(particle);
-        }
-    }
-}
 
 /**
  * @class GravitationalClustering
@@ -45,7 +28,7 @@ export default class GravitationalClustering {
      * @param {number} [options.deltaGravitationalConstant=0.001] - Constant to reduce the gravitational constant.
      * @param {number} [options.alpha=0.03] - Minimum percentage of the dataset to become a cluster.
      * @param {number} [options.gamma=0.2] - Percentage of space used as the radius of each particle used to create the clusters.
-     * @param {number} [options.dist] - Distance function that takes two points, see [ml-distance]{@link https://github.com/mljs/distance}
+     * @param {string} [options.distance] - Distance function that takes two points, see [ml-distance]{@link https://github.com/mljs/distance}
      * @param {number} [options.iterations=100] - Number of iterations of the algorithm.
      * @param {number} [options.seed] - seed for the random generator algorithm, must be a 32-bit integer.
      */
@@ -56,7 +39,7 @@ export default class GravitationalClustering {
         this.deltaGravitationalConstant = options.deltaGravitationalConstant;
         this.alpha = options.alpha;
         this.gamma = options.gamma;
-        this.dist = options.dist;
+        this.distance = options.distance;
         this.iterations = options.iterations;
         this.seed = options.seed;
 
@@ -65,6 +48,7 @@ export default class GravitationalClustering {
         this.eps = Number.MAX_VALUE;
         this.engine = Random.engines.mt19937();
         this.engine.seed(this.seed);
+        this.dist = Distance[this.distance];
     }
 
     /**
@@ -100,8 +84,10 @@ export default class GravitationalClustering {
             this.disjointElems[i] = this.uf.add(i);
             var elem = X[i];
             var mass = masses[i];
-            if (dim !== elem.length) throw new RangeError('The element at position ' + i + 'must have a size of '
+            if (dim !== elem.length) {
+                throw new RangeError('The element at position ' + i + 'must have a size of '
                                                         + dim + ' but has: ' + elem.length);
+            }
 
             for (var j = 0; j < dim; ++j) {
                 var comp = elem[j];
@@ -200,5 +186,3 @@ export default class GravitationalClustering {
         };
     }
 }
-
-module.exports = GravitationalClustering;

@@ -1,4 +1,4 @@
-var GravitationalClustering = require('..');
+import GravitationalClustering from '..';
 
 describe('basic implementation', function () {
 

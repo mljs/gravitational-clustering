@@ -1,3 +1,3 @@
-'use strict';
+import {default as GravitationalClustering} from './GravitationalClustering';
+export default GravitationalClustering;
 
-module.exports = require('./GravitationalClustering');
