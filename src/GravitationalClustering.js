@@ -35,7 +35,7 @@ class ParticleCluster {
 /**
  * @class GravitationalClustering
  */
-class GravitationalClustering {
+export default class GravitationalClustering {
 
     /**
      * Create a new instance of a Gravitational Clustering algorithm
