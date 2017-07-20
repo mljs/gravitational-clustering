@@ -46,6 +46,7 @@
   "dependencies": {
     "ml-disjoint-set": "^1.0.0",
     "ml-distance": "^2.1.1",
+    "ml-distance-euclidean": "^1.0.0",
     "random-js": "^1.0.8"
   }
 }
