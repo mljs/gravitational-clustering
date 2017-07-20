@@ -1,10 +1,8 @@
-'use strict';
-
 var GravitationalClustering = require('..');
 
 describe('basic implementation', function () {
 
-    it('Linear separable clusters', function () {
+    test('Linear separable clusters', function () {
         var clusters = 3;
         var size = 5;
         var arr = new Array(clusters * size);
@@ -21,12 +19,12 @@ describe('basic implementation', function () {
 
         for (i = 0; i < clusters; ++i) {
             for (j = 0; j < size; ++j) {
-                result.y[i * size + j].should.be.equal(expectedOutput[i * size + j]);
+                expect(result.y[i * size + j]).toBe(expectedOutput[i * size + j]);
             }
         }
     });
 
-    it('Non-linear clusters', function () {
+    test('Non-linear clusters', function () {
         var size = 200;
         var arr = new Array(size * 5);
         for (var i = 0; i < size; ++i) {
@@ -41,10 +39,10 @@ describe('basic implementation', function () {
         var result = gc.train(arr);
 
         for (i = 0; i < 800; i++) {
-            result.y[i].should.be.equal(0);
+            expect(result.y[i]).toBe(0);
         }
         for (i = 800; i < 1000; i++) {
-            result.y[i].should.be.equal(1);
+            expect(result.y[i]).toBe(1);
         }
     });
 });

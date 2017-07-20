@@ -1,9 +1,20 @@
-'use strict';
+import Random from 'random-js';
 
 var Particle = require('./Particle');
 var UnionFind = require('ml-disjoint-set');
 var Distance = require('ml-distance').distance;
 var randomInt = require('./Utils').randomInt;
+
+const defaultOptions = {
+    unitMass : true,
+    gravitationalConstant : Math.pow(10, -4),
+    deltaGravitationalConstant : 0.001,
+    alpha : 0.03,
+    gamma : 0.2,
+    dist : Distance.euclidean,
+    iterations : 100,
+    seed: 42
+};
 
 /**
  * @class ParticleCluster
@@ -11,7 +22,7 @@ var randomInt = require('./Utils').randomInt;
 class ParticleCluster {
     /**
      * ParticleCluster constructor.
-     * @param particle {Particle} - Initial particle for the cluster (optional)
+     * @param {Particle} particle - Initial particle for the cluster (optional)
      */
     constructor(particle) {
         this.elements = [];
@@ -28,34 +39,39 @@ class GravitationalClustering {
 
     /**
      * Create a new instance of a Gravitational Clustering algorithm
-     * @param {Object} options
-     * @param {Boolean} [options.unitMass] - the mass of each point are equal.
-     * @param {Number} [options.gravitationalConstant=10^-4] - Gravitational constant.
-     * @param {Number} [options.deltaGravitationalConstant=0.001] - Constant to reduce the gravitational constant.
-     * @param {Number} [options.alpha=0.03] - Minimum percentage of the dataset to become a cluster.
-     * @param {Number} [options.gamma=0.2] - Percentage of space used as the radius of each particle used to create the clusters.
-     * @param {Number} [options.dist] - Distance function that takes two points, see [ml-distance]{@link https://github.com/mljs/distance}
+     * @param {object} options
+     * @param {boolean} [options.unitMass] - the mass of each point are equal.
+     * @param {number} [options.gravitationalConstant=10^-4] - Gravitational constant.
+     * @param {number} [options.deltaGravitationalConstant=0.001] - Constant to reduce the gravitational constant.
+     * @param {number} [options.alpha=0.03] - Minimum percentage of the dataset to become a cluster.
+     * @param {number} [options.gamma=0.2] - Percentage of space used as the radius of each particle used to create the clusters.
+     * @param {number} [options.dist] - Distance function that takes two points, see [ml-distance]{@link https://github.com/mljs/distance}
      * @param {number} [options.iterations=100] - Number of iterations of the algorithm.
+     * @param {number} [options.seed] - seed for the random generator algorithm, must be a 32-bit integer.
      */
     constructor(options) {
-        options = options || {};
-        this.unitMass = options.unitMass || true;
-        this.gravitationalConstant = options.gravitationalConstant || Math.pow(10, -4);
-        this.deltaGravitationalConstant = options.deltaGravitationalConstant || 0.001;
-        this.alpha = options.alpha || 0.03;
-        this.eps = Number.MAX_VALUE;
-        this.gamma = options.gamma || 0.2;
-        this.dist = options.dist || Distance.euclidean;
-        this.iterations = options.iterations || 100;
+        options = Object.assign({}, defaultOptions, options);
+        this.unitMass = options.unitMass;
+        this.gravitationalConstant = options.gravitationalConstant;
+        this.deltaGravitationalConstant = options.deltaGravitationalConstant;
+        this.alpha = options.alpha;
+        this.gamma = options.gamma;
+        this.dist = options.dist;
+        this.iterations = options.iterations;
+        this.seed = options.seed;
 
         this.particles = [];
         this.outliers = [];
+        this.eps = Number.MAX_VALUE;
+        this.engine = Random.engines.mt19937();
+        this.engine.seed(this.seed);
     }
 
     /**
-     * Set the points and corresponding masses for the algorithm
+     * Fit
      * @param {Array} X - Points to create the clusters.
      * @param {Array} masses - Mass of each point (Optional).
+     * @return {object}
      */
     train(X, masses) {
         if (X.length === 0) {
@@ -129,10 +145,12 @@ class GravitationalClustering {
      * @return {object}
      */
     run(iterations) {
+        var distribution = Random.integer(0, this.particles.length - 1);
+
         for (var i = 0; i < iterations; ++i) {
             for (var j = 0; j < this.particles.length; ++j) {
-                var k = randomInt(this.particles.length);
-                while (k === j) k = randomInt(this.particles.length);
+                var k = distribution(this.engine); // randomInt(this.particles.length);
+                while (k === j) k = distribution(this.engine); //randomInt(this.particles.length);
 
                 var xk = this.particles[k];
                 var xj = this.particles[j];
