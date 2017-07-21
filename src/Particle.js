@@ -6,11 +6,7 @@ export default class Particle {
      * @param mass {number} - the mass of the particle (default: 1.0).
      */
     constructor(position, mass) {
-        this.position = new Array(position.length);
-        for (var i = 0; i < position.length; ++i) {
-            this.position[i] = position[i];
-        }
-
+        this.position = position.slice();
         this.mass = mass || 1.0;
         this.originalPosition = position;
     }
@@ -50,9 +46,6 @@ export default class Particle {
         var scale = 0.0;
         if (magnitude > 0) scale = (gravityConstant * particleA.mass * particleB.mass) / (2.0 * magnitude * magnitude * magnitude);
 
-        var move = new Array(dimension);
-        for (i = 0; i < dimension; ++i) move[i] = difference[i] * scale;
-
-        return move;
+        return difference.map((val) => val * scale);
     }
 }

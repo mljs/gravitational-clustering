@@ -85,8 +85,7 @@ export default class GravitationalClustering {
             var elem = X[i];
             var mass = masses[i];
             if (dim !== elem.length) {
-                throw new RangeError('The element at position ' + i + 'must have a size of '
-                                                        + dim + ' but has: ' + elem.length);
+                throw new RangeError(`the element at position ${i} must have a size of ${dim} but has: ${elem.length}`);
             }
 
             for (var j = 0; j < dim; ++j) {

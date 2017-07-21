@@ -1,8 +1,7 @@
 import GravitationalClustering from '..';
 
-describe('basic implementation', function () {
-
-    test('Linear separable clusters', function () {
+describe('basic implementation', () => {
+    test('Linear separable clusters', () => {
         var clusters = 3;
         var size = 5;
         var arr = new Array(clusters * size);
@@ -24,7 +23,7 @@ describe('basic implementation', function () {
         }
     });
 
-    test('Non-linear clusters', function () {
+    test('Non-linear clusters', () => {
         var size = 200;
         var arr = new Array(size * 5);
         for (var i = 0; i < size; ++i) {
@@ -49,7 +48,7 @@ describe('basic implementation', function () {
         }
     });
 
-    test('Load and save', function () {
+    test('Load and save', () => {
         var size = 200;
         var arr = new Array(size * 5);
         for (var i = 0; i < size; ++i) {
